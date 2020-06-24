@@ -1,6 +1,6 @@
 import requests
 
-query = "Cos'è l'entropia"
+query = "Quanto è altro l'Everest"
 url = "https://api.qwant.com/api/search/web?count=10&offset=0&q={key}&t=web&uiv=4&locale=it_It"
 #results = qwant.items("site:wikipedia.org " + query, count=5)
 
@@ -93,8 +93,14 @@ def answer(query):
         print("ALTERNATIVE SAME POINTS")
         print(a["desc"])
         print("\n")
-                
-    return cws, current_valid, alternatives
+
+    f = False
+
+    if current_valid is None:
+   #     print("ESCAPE MODE NOT VALID " + str(items[0]))
+        f = True
+    current_valid = items[0]
+    return cws, current_valid, alternatives, f
 
 
 
@@ -118,5 +124,7 @@ def contains_all(query, desc):
                     ws.remove(wq)
     return len(ws), cws
             
-cws, current_valid, alternatives = answer(query)
+cws, current_valid, alternatives, f = answer(query)
+print(current_valid)
 analyze(cws, current_valid["desc"], alternatives)
+if f: print("THE RESULT GIVEN IS NOT STABLE :(")
