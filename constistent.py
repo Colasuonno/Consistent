@@ -1,11 +1,13 @@
 import requests
 
-query = "Quanto è altro l'Everest"
+query = "Che tempo fa domani"
 url = "https://api.qwant.com/api/search/web?count=10&offset=0&q={key}&t=web&uiv=4&locale=it_It"
 #results = qwant.items("site:wikipedia.org " + query, count=5)
 
 ignored_words = ["il", "lo", "la", "i", "gli", "le", "che", "anche", "ma", "un", "uno", "una"]
 ignored_websites = ["youtube.com"]
+
+numbers_words = ["quando", "quanto", "quanti", "quante"]
 
 MIN_POINTS = 1
 
@@ -33,6 +35,10 @@ def consistent(item, query):
     
     """
 
+def contains_digits(s):
+    return any(i.isdigit() for i in s)
+
+
 def closest_space_in_sentence(sentence, query_words):
     ws = sentence.split(" ")
     min_space = 100000 # Just high number
@@ -54,8 +60,9 @@ def analyze(query_words, valid, alternatives):
     for s in valid.split("."):
         spaces = closest_space_in_sentence(s, query_words)
         if spaces < current_min_space:
-            current_min_space = spaces
-            current_min_sentence = s
+            if "?" not in s:
+                current_min_space = spaces
+                current_min_sentence = s
     print("SPACES MIN: " + str(current_min_space))
     print("RESULT:")
     print(current_min_sentence)
@@ -110,7 +117,9 @@ def contains_all(query, desc):
     for a in ws:
         if a == "" or a in ignored_words:
             ws.remove(a)
-    
+
+    additional_points = 0
+  
     # print("QUERY " + str(ws))
    # print("\n")
     cws = ws.copy()
@@ -122,8 +131,12 @@ def contains_all(query, desc):
       #          print(wq)
                 if wq in ws:
                     ws.remove(wq)
-    return len(ws), cws
-            
+    for qw in numbers_words:
+        if qw in desc:
+            if contains_digits(desc):
+                additional_points += 1
+    return len(ws) - additional_points, cws
+
 cws, current_valid, alternatives, f = answer(query)
 print(current_valid)
 analyze(cws, current_valid["desc"], alternatives)
