@@ -1,6 +1,7 @@
 import requests
+from newspaper import Article
 
-query = "Qual è la composizione del Azoto"
+query = "Come si chiama il papa"
 url = "https://api.qwant.com/api/search/web?count=10&offset=0&q={key}&t=web&uiv=4&locale=it_It"
 #results = qwant.items("site:wikipedia.org " + query, count=5)
 
@@ -35,9 +36,19 @@ def consistent(item, query):
     
     """
 
+
+def analyze_result(query_words, result_url):
+    article = Article(result_url)
+    article.download()
+    article.parse()
+    print("\n")
+    print("RESULT PARSED")
+    print(article.text) 
+    #print(len(sentences))
+    #print(sentences)
+
 def contains_digits(s):
     return any(i.isdigit() for i in s)
-
 
 def closest_space_in_sentence(sentence, query_words):
     ws = sentence.split(" ")
@@ -93,7 +104,9 @@ def answer(query):
                     current_valid = i
                 
     if current_valid_points != -1:
+        print("----- CURRENT ITEM FOUND -----")
         print("VALID POINTS " + str(current_valid_points))
+        print("WEBSITE: " + str(current_valid["url"]))
         print(current_valid["desc"])
     for a in alternatives:
         print("\n")
@@ -106,7 +119,7 @@ def answer(query):
     if current_valid is None:
    #     print("ESCAPE MODE NOT VALID " + str(items[0]))
         f = True
-    current_valid = items[0]
+        current_valid = items[0]
     return cws, current_valid, alternatives, f
 
 
@@ -138,6 +151,12 @@ def contains_all(query, desc):
     return len(ws) - additional_points, cws
 
 cws, current_valid, alternatives, f = answer(query)
-print(current_valid)
-analyze(cws, current_valid["desc"], alternatives)
+print("\n")
+print("ROW RESULT:")
+print(current_valid["desc"])
+
+#analyze(cws,article.text, alternatives)
 if f: print("THE RESULT GIVEN IS NOT STABLE :(")
+
+
+analyze_result(cws, current_valid["url"])
